@@ -1,20 +1,83 @@
-// minesweepers.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+#include<SFML/Graphics.hpp>
+#include<time.h>
 
-#include <iostream>
+using namespace sf;
+
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    srand(time(0));
+
+    RenderWindow app(VideoMode(400, 400), "Start The Minesweeper");
+
+    int w = 32;
+    int grid[12][12];
+    int sgrid[12][12]; // For showing the grid
+
+    Texture t;
+    t.loadFromFile("images/tiles.jpg");
+    Sprite s(t);
+
+    for (int i = 1; i <= 10; i++)
+        for (int j = 1; j <= 10; j++) {
+            sgrid[i][j] = 10;
+
+            if (rand() % 5 == 0) grid[i][j] = 9;
+            else grid[i][j] = 0;
+        }
+
+    for (int i = 1; i <= 10; i++)
+        for (int j = 1; j <= 10; j++) {
+            int n = 0;
+            if (grid[i][j] == 9) continue;
+            if (grid[i + 1][j] == 9) n++;
+            if (grid[i][j + 1] == 9) n++;
+            if (grid[i - 1][j] == 9) n++;
+            if (grid[i][j - 1] == 9) n++;
+
+            if (grid[i + 1][j + 1] == 9) n++;
+            if (grid[i - 1][j - 1] == 9) n++;
+            if (grid[i - 1][j + 1] == 9) n++;
+            if (grid[i + 1][j - 1] == 9) n++;
+
+            grid[i][j] = n;
+        }
+
+    while (app.isOpen())
+    {
+        Vector2i pos = Mouse::getPosition(app);
+        int x = pos.x / w;
+        int y = pos.y / w;
+
+        Event e;
+        while (app.pollEvent(e))
+        {
+            if (e.type == Event::Closed)
+                app.close();
+
+            if (e.type == Event::MouseButtonPressed)
+                if (e.key.code == Mouse::Left) sgrid[x][y] = grid[x][y];
+                else if (e.key.code == Mouse::Right) sgrid[x][y] = 11;
+
+        }
+
+        app.clear(Color::White);
+        for (int i = 1; i <= 10; i++)
+            for (int j = 1; j <= 10; j++) {
+
+                if (sgrid[x][y] == 9) sgrid[i][j] = grid[i][j];
+
+                s.setTextureRect(IntRect(sgrid[i][j] * w, 0, w, w));
+                s.setPosition(i * w, j * w);
+                app.draw(s);
+            }
+
+        app.display();
+
+
+
+    }
+
+
+
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
